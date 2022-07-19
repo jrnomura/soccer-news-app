@@ -3,6 +3,7 @@ package com.jrnomura.soccernews.ui.adapter;
 import android.content.Intent;
 import android.net.Uri;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -17,9 +18,11 @@ import java.util.List;
 public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
 
     private List<News> news;
+    private View.OnClickListener favoriteListener;
 
-    public NewsAdapter(List<News> news){
+    public NewsAdapter(List<News> news, View.OnClickListener favoriteListener){
         this.news = news;
+        this.favoriteListener = favoriteListener;
     }
 
     @NonNull
@@ -36,11 +39,25 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
         holder.binding.tvTitle.setText(news.getTitle());
         holder.binding.tvDescription.setText(news.getDescription());
         Picasso.get().load(news.getImage()).fit().into(holder.binding.ivThumbnail);
+
+        //Implementação da funcionalidade de abrir link
         holder.binding.btOpenLink.setOnClickListener(view -> {
             Intent intent = new Intent();
             intent.setData(Uri.parse(news.getLink()));
             holder.itemView.getContext().startActivity(intent);
         });
+
+        //Implementação da funcionalidade de compartilhar
+        holder.binding.ivShare.setOnClickListener(view -> {
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_SUBJECT, news.getLink());
+            intent.putExtra(Intent.EXTRA_TEXT, news.getLink());
+            holder.itemView.getContext().startActivity(Intent.createChooser(intent, "Share"));
+        });
+
+        //Implementação da funcionalidade de favoritar (o evento será instaciado pelo Fragment
+        holder.binding.ivFavorite.setOnClickListener(this.favoriteListener);
     }
 
     @Override
